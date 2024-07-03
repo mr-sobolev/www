@@ -9,6 +9,7 @@ use Enqueue\AmqpLib\AmqpMessage;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\Impl\AmqpBind;
+use Illuminate\Support\Facades\Log;
 
 class RabbitMQService
 {
@@ -49,9 +50,9 @@ class RabbitMQService
             $context->createProducer()->send($tasksTopic, $message);
 
             $context->close();
-            $this->info("Message sent to topic '{tasks}': '{$this->message}'");
+            Log::info("Message sent to topic", ["tasks" => $messageBody]);
         }catch(Exception $err){
-            $this->error("Throw '{error}': '$err->getMessage()', '{$messageBody}' not send");
+            Log::error("Throw, not send", ["error" => $err->getMessage(), "message" => $messageBody]);
         }
     }
 }

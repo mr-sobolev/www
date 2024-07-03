@@ -11,15 +11,18 @@ class APIController extends Controller
 {
     public function store(Request $request)
     {
+        $data = $request->all();
+        if (isset($data['is_done'])) {
+            $data['is_done'] = filter_var($data['is_done'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        }
         $rules = config('validate.message.rules');
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($data, $rules);
 
         if ($validator->fails()) {
-             return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
- 
+
         $messageData = $validator->validated();
- 
         $encodedMessage = json_encode($messageData);
         SendMessageToRabbitMQ::dispatch($encodedMessage);
 
@@ -30,6 +33,14 @@ class APIController extends Controller
     {
         $perPage = $request->input('per_page', 10);
         $tasks = ReadableTask::paginate($perPage);
+        $tasks->getCollection()->transform(function ($task) {
+            return [
+                'id'    => $task->id,
+                'title' => $task->title,
+                'content' => $task->content,
+                'is_done' => $task->is_done
+            ];
+        });
         return response()->json($tasks);
     }
 }

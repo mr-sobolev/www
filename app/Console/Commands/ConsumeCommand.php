@@ -51,23 +51,20 @@ class ConsumeCommand extends Command
         });
 
         $context = $rabbitMQService->createContext();
-        $tasksQueue = $context->createQueue('tasks');
-        $tasksQueue->addFlag(AmqpQueue::FLAG_DURABLE);
-        $context->declareQueue($tasksQueue);
-
-        $tasksConsumer = $context->createConsumer($tasksQueue);
+        $queue = $context->createQueue('tasks');
+        $tasksConsumer = $context->createConsumer($queue);
         $subscriptionConsumer = $context->createSubscriptionConsumer();
-        echo " [*] Waiting for messages. To exit press CTRL+C\n";
+        $this->info(" [*] Waiting for messages. To exit press CTRL+C\n");
         while($keepRunning){
-            pcntl_signal_dispatch();
-            
             $subscriptionConsumer->subscribe($tasksConsumer, function(Message $message, Consumer $consumer) {
-                SaveMessageInDatabase::dispatch($message->getBody());
+                $data = $message->getBody();
+                $this->info("Income message, ['message' => $data]");
+                SaveMessageInDatabase::dispatch($data);
                 $consumer->acknowledge($message);
                 return true;
             });
             // Sleep for a short period to avoid high CPU usage
-            usleep(500000); // 0.5 second
+            $subscriptionConsumer->consume(500);
         }
 
         $context->close();

@@ -11,4 +11,14 @@ class WritableTask extends Model
     use HasFactory;
     use SoftDeletes;
 
+    protected $fillable = [
+        'title',
+        'content',
+        'is_done',
+    ];
+
+    protected $casts = [
+        'is_done' => 'boolean'
+    ];
+
 }

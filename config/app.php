@@ -126,6 +126,7 @@ return [
     'aliases' =>[
         'Redis' => Illuminate\Support\Facades\Redis::class,
         'Route' => Illuminate\Support\Facades\Route::class,
+        'DB' => Illuminate\Support\Facades\DB::class,
     ],
 
 ];

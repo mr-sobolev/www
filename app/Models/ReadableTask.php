@@ -10,5 +10,8 @@ class ReadableTask extends Model
     use HasFactory;
 
     protected $connection = 'pgsql_fdw';
-    protected $guarded = [];
+    
+    protected $casts = [
+        'is_done' => 'boolean'
+    ];
 }
